@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useAuth } from '@/hooks/useAuth'
+import { authFetch } from '@/lib/authFetch'
 import { 
   Brain, 
   Search, 
@@ -59,7 +60,7 @@ export function Navigation({ onSearch, onTagFilter, searchQuery = '', selectedTa
 
   const fetchTags = async () => {
     try {
-      const response = await fetch('/api/tags', { credentials: 'include' })
+      const response = await authFetch('/api/tags')
       if (response.status === 401) {
         logout()
         router.push('/login')

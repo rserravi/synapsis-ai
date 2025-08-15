@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { ArrowLeft, BookOpen, Shuffle, Target, Maximize, Monitor } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { authFetch } from '@/lib/authFetch'
 
 interface CardData {
   id: string
@@ -46,9 +47,7 @@ export function StudyPage() {
       
       if (cardIdParam) {
         // Estudiar una ficha específica
-        const response = await fetch(`/api/cards/${cardIdParam}`, {
-          credentials: 'include',
-        })
+        const response = await authFetch(`/api/cards/${cardIdParam}`)
         if (response.status === 401) {
           window.location.href = '/login'
           return
@@ -59,9 +58,7 @@ export function StudyPage() {
         }
       } else {
         // Estudiar todas las fichas
-        const response = await fetch('/api/cards?limit=50', {
-          credentials: 'include',
-        })
+        const response = await authFetch('/api/cards?limit=50')
         if (response.status === 401) {
           window.location.href = '/login'
           return

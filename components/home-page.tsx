@@ -12,6 +12,7 @@ import { Brain, Plus, BookOpen, Target, Zap, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+import { authFetch } from '@/lib/authFetch'
 
 interface CardData {
   id: string
@@ -64,9 +65,7 @@ export function HomePage() {
       if (searchQuery) params.set('search', searchQuery)
       if (selectedTag) params.set('tag', selectedTag)
 
-      const response = await fetch(`/api/cards?${params}`, {
-        credentials: 'include'
-      })
+      const response = await authFetch(`/api/cards?${params}`)
       if (response.status === 401) {
         router.push('/login')
         return

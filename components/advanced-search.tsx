@@ -24,6 +24,7 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { debounce } from 'lodash'
+import { authFetch } from '@/lib/authFetch'
 
 interface Tag {
   id: string
@@ -76,7 +77,7 @@ export function AdvancedSearch({ onFiltersChange, totalResults, isLoading = fals
 
   const fetchTags = async () => {
     try {
-      const response = await fetch('/api/tags', { credentials: 'include' })
+      const response = await authFetch('/api/tags')
       if (response.status === 401) {
         window.location.href = '/login'
         return

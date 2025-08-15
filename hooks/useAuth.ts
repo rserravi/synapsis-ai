@@ -53,10 +53,11 @@ export function useAuth() {
     if (!res.ok) {
       throw new Error('Login failed')
     }
-    const data = (await res.json()) as User
-    setUser(data)
-    localStorage.setItem('user', JSON.stringify(data))
-    return data
+    const { token, ...userData } = (await res.json()) as User & { token: string }
+    setUser(userData)
+    localStorage.setItem('user', JSON.stringify(userData))
+    localStorage.setItem('token', token)
+    return userData
   }, [])
 
   const logout = useCallback(() => {

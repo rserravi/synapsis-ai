@@ -27,7 +27,12 @@ export async function POST(req: NextRequest) {
       process.env.AUTH_COOKIE_SECURE !== undefined
         ? process.env.AUTH_COOKIE_SECURE === 'true'
         : req.nextUrl.protocol === 'https:'
-    const res = NextResponse.json({ id: user.id, name: user.name, email: user.email })
+    const res = NextResponse.json({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      token,
+    })
     res.cookies.set(AUTH_COOKIE, token, {
       httpOnly: true,
       secure,

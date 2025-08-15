@@ -2,17 +2,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getUserIdFromRequest } from '@/lib/auth'
+import { Prisma } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
 // GET - Obtener todas las fichas con filtros
 export async function GET(request: NextRequest) {
-  try {
-    const userId = getUserIdFromRequest(request)
-    if (!userId) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-    }
+  const userId = getUserIdFromRequest(request)
+  if (!userId) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  }
 
+  try {
     const { searchParams } = new URL(request.url)
     const search = searchParams.get('search')
     const tag = searchParams.get('tag')
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const skip = (page - 1) * limit
 
-    let where: any = { userId }
+    let where: Prisma.CardWhereInput = { userId }
 
     // Búsqueda de texto completo
     if (search) {
@@ -88,12 +89,12 @@ export async function GET(request: NextRequest) {
 
 // POST - Crear nueva ficha
 export async function POST(request: NextRequest) {
-  try {
-    const userId = getUserIdFromRequest(request)
-    if (!userId) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-    }
+  const userId = getUserIdFromRequest(request)
+  if (!userId) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  }
 
+  try {
     const data = await request.json()
     const { title, source, level1, level2, level3, level4, questions, tags } = data
 

@@ -53,6 +53,7 @@ export function EnhancedHomePage() {
     total: 0,
     totalPages: 0
   })
+  const [error, setError] = useState('')
   const [filters, setFilters] = useState<SearchFilters>({
     query: '',
     tags: [],
@@ -68,6 +69,7 @@ export function EnhancedHomePage() {
   const fetchCards = async (page = 1) => {
     try {
       setLoading(true)
+      setError('')
       const params = new URLSearchParams({
         page: page.toString(),
         limit: '12',
@@ -81,7 +83,15 @@ export function EnhancedHomePage() {
       }
       if (filters.dateRange !== 'all') params.set('dateRange', filters.dateRange)
 
-      const response = await fetch(`/api/cards/search?${params}`)
+      const response = await fetch(`/api/cards/search?${params}`, {
+        credentials: 'include'
+      })
+      if (response.status === 401) {
+        setError('Debes iniciar sesión para ver tus fichas')
+        setCards([])
+        setPagination({ page: 1, total: 0, totalPages: 0 })
+        return
+      }
       if (response.ok) {
         const data: PaginatedResponse = await response.json()
         setCards(data.cards)
@@ -134,6 +144,22 @@ export function EnhancedHomePage() {
   ]
 
   const hasFilters = filters.query || filters.tags.length > 0 || filters.dateRange !== 'all'
+
+  if (error) {
+    return (
+      <div className="min-h-screen">
+        <Navigation />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center py-12">
+            <p className="text-slate-600 dark:text-slate-400 mb-6">{error}</p>
+            <Link href="/login">
+              <Button>Iniciar sesión</Button>
+            </Link>
+          </div>
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen">

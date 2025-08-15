@@ -12,8 +12,22 @@ export function verifyToken(token: string): { userId: string } {
   return jwt.verify(token, JWT_SECRET) as { userId: string }
 }
 
+/**
+ * Extracts the userId from either the auth cookie or the Authorization header.
+ * Returns null if no valid token is present.
+ */
 export function getUserIdFromRequest(req: NextRequest): string | null {
-  const token = req.cookies.get(AUTH_COOKIE)?.value
+  let token = req.cookies.get(AUTH_COOKIE)?.value
+
+  if (!token) {
+    const authHeader = req.headers.get('Authorization') || ''
+    if (authHeader.startsWith('Bearer ')) {
+      token = authHeader.slice(7)
+    } else if (authHeader) {
+      token = authHeader
+    }
+  }
+
   if (!token) return null
   try {
     const { userId } = verifyToken(token)

@@ -1,22 +1,12 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { parse } from 'cookie'
 import { AUTH_COOKIE } from '@/lib/auth'
 
 interface User {
   id: string
   name: string
   email: string
-}
-
-function getToken(): string | null {
-  if (typeof document === 'undefined') return null
-  const fromStorage =
-    localStorage.getItem('Authorization') || localStorage.getItem('token')
-  if (fromStorage) return fromStorage
-  const cookies = parse(document.cookie ?? '')
-  return cookies[AUTH_COOKIE] ?? null
 }
 
 export function useAuth() {
@@ -33,18 +23,24 @@ export function useAuth() {
       }
     }
 
-    const token = getToken()
-    if (token) {
-      fetch('/api/auth/me', { credentials: 'include' })
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (data) {
-            setUser(data as User)
-            localStorage.setItem('user', JSON.stringify(data))
-          }
-        })
-        .catch(() => {})
-    }
+    fetch('/api/auth/me', { credentials: 'include' })
+      .then((res) => {
+        if (res.status === 401) {
+          localStorage.removeItem('user')
+          localStorage.removeItem('Authorization')
+          localStorage.removeItem('token')
+          setUser(null)
+          return null
+        }
+        return res.ok ? res.json() : null
+      })
+      .then((data) => {
+        if (data) {
+          setUser(data as User)
+          localStorage.setItem('user', JSON.stringify(data))
+        }
+      })
+      .catch(() => {})
   }, [])
 
   const login = useCallback(async (email: string, password: string) => {

@@ -1,11 +1,17 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { getUserIdFromRequest } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
+    const userId = getUserIdFromRequest(request)
+    if (!userId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
     const { searchParams } = new URL(request.url)
     const search = searchParams.get('search')
     const tags = searchParams.getAll('tags')
@@ -16,7 +22,7 @@ export async function GET(request: NextRequest) {
     const dateRange = searchParams.get('dateRange') || 'all'
     const skip = (page - 1) * limit
 
-    let where: any = {}
+    let where: any = { userId }
 
     // Búsqueda de texto completo
     if (search) {

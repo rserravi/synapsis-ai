@@ -7,6 +7,19 @@ datasource db {
     url    = env("DATABASE_URL")
 }
 
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cards     Card[]
+
+  @@map("users")
+}
+
 model Card {
   id    String   @id @default(cuid())
   title    String
@@ -20,10 +33,13 @@ model Card {
   
   // Preguntas de autoevaluación
   questions   String[] // Array de preguntas generadas
-  
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   // Relación con etiquetas (muchos a muchos)
   tags    CardTag[]
   

@@ -1,10 +1,22 @@
 
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 async function main() {
   console.log('🌱 Iniciando seed de la base de datos...')
+
+  // Crear usuario demo
+  const demoUser = await prisma.user.upsert({
+    where: { email: 'demo@example.com' },
+    update: {},
+    create: {
+      email: 'demo@example.com',
+      name: 'Demo',
+      password: await bcrypt.hash('password', 10)
+    }
+  })
 
   // Crear etiquetas
   const tags = await Promise.all([
@@ -92,6 +104,7 @@ async function main() {
         level3: cardData.level3,
         level4: cardData.level4,
         questions: cardData.questions,
+        userId: demoUser.id,
         tags: {
           create: tagNames.map(tagName => ({
             tag: {

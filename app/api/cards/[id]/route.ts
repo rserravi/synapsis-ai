@@ -1,6 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { getUserIdFromRequest } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,8 +11,13 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const card = await prisma.card.findUnique({
-      where: { id: params.id },
+    const userId = getUserIdFromRequest(request)
+    if (!userId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
+    const card = await prisma.card.findFirst({
+      where: { id: params.id, userId },
       include: {
         tags: {
           include: {
@@ -50,8 +56,18 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const userId = getUserIdFromRequest(request)
+    if (!userId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
     const data = await request.json()
     const { title, source, level1, level2, level3, level4, questions, tags } = data
+
+    const existing = await prisma.card.findFirst({ where: { id: params.id, userId } })
+    if (!existing) {
+      return NextResponse.json({ error: 'Ficha no encontrada' }, { status: 404 })
+    }
 
     // Eliminar etiquetas existentes
     await prisma.cardTag.deleteMany({
@@ -110,6 +126,16 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const userId = getUserIdFromRequest(request)
+    if (!userId) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
+    const card = await prisma.card.findFirst({ where: { id: params.id, userId } })
+    if (!card) {
+      return NextResponse.json({ error: 'Ficha no encontrada' }, { status: 404 })
+    }
+
     await prisma.card.delete({
       where: { id: params.id }
     })

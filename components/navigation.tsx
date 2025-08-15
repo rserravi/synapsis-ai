@@ -143,7 +143,20 @@ export function Navigation({ onSearch, onTagFilter, searchQuery = '', selectedTa
           </div>
         )}
 
-        {user && <UserMenu user={user} onLogout={logout} />}
+        {user ? (
+          <UserMenu user={user} onLogout={logout} />
+        ) : (
+          <div className="flex items-center space-x-2">
+            <Link href="/login">
+              <Button variant="ghost" size="sm">
+                Iniciar sesión
+              </Button>
+            </Link>
+            <Link href="/register">
+              <Button size="sm">Registrarse</Button>
+            </Link>
+          </div>
+        )}
 
         {/* Mobile menu button */}
         <Button

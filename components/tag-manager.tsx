@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -19,6 +20,7 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useToast } from '@/hooks/use-toast'
+import { useAuth } from '@/hooks/useAuth'
 
 interface TagData {
   id: string
@@ -55,6 +57,17 @@ export function TagManager({ trigger, onTagsUpdated }: TagManagerProps) {
   const [error, setError] = useState('')
 
   const { toast } = useToast()
+  const router = useRouter()
+  const { logout } = useAuth()
+
+  const handleUnauthorized = () => {
+    toast({
+      title: 'Sesión expirada',
+      description: 'Por favor, inicia sesión nuevamente.',
+    })
+    logout()
+    router.push('/login')
+  }
 
   useEffect(() => {
     if (isOpen) {
@@ -65,7 +78,11 @@ export function TagManager({ trigger, onTagsUpdated }: TagManagerProps) {
   const fetchTags = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/tags')
+      const response = await fetch('/api/tags', { credentials: 'include' })
+      if (response.status === 401) {
+        handleUnauthorized()
+        return
+      }
       if (response.ok) {
         const tagsData = await response.json()
         setTags(tagsData)
@@ -95,7 +112,13 @@ export function TagManager({ trigger, onTagsUpdated }: TagManagerProps) {
           name: newTagName.trim(),
           color: newTagColor,
         }),
+        credentials: 'include',
       })
+
+      if (response.status === 401) {
+        handleUnauthorized()
+        return
+      }
 
       if (!response.ok) {
         throw new Error('Error al crear etiqueta')
@@ -134,7 +157,13 @@ export function TagManager({ trigger, onTagsUpdated }: TagManagerProps) {
           name: newTagName.trim(),
           color: newTagColor,
         }),
+        credentials: 'include',
       })
+
+      if (response.status === 401) {
+        handleUnauthorized()
+        return
+      }
 
       if (!response.ok) {
         throw new Error('Error al actualizar etiqueta')
@@ -170,7 +199,13 @@ export function TagManager({ trigger, onTagsUpdated }: TagManagerProps) {
       setLoading(true)
       const response = await fetch(`/api/tags/${tag.id}`, {
         method: 'DELETE',
+        credentials: 'include',
       })
+
+      if (response.status === 401) {
+        handleUnauthorized()
+        return
+      }
 
       if (!response.ok) {
         throw new Error('Error al eliminar etiqueta')

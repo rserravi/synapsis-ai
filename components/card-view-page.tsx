@@ -39,8 +39,15 @@ export function CardViewPage({ cardId }: CardViewPageProps) {
   const fetchCard = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/cards/${cardId}`)
-      
+      setError('')
+      const response = await fetch(`/api/cards/${cardId}`, {
+        credentials: 'include'
+      })
+
+      if (response.status === 401) {
+        setError('Debes iniciar sesión para ver esta ficha')
+        return
+      }
       if (!response.ok) {
         if (response.status === 404) {
           setError('Ficha no encontrada')
@@ -72,6 +79,7 @@ export function CardViewPage({ cardId }: CardViewPageProps) {
   }
 
   if (error || !card) {
+    const unauthorized = error.includes('iniciar sesión')
     return (
       <div className="min-h-screen">
         <Navigation />
@@ -88,14 +96,22 @@ export function CardViewPage({ cardId }: CardViewPageProps) {
               {error || 'Ficha no encontrada'}
             </h2>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
-              No se pudo cargar la ficha solicitada. Es posible que haya sido eliminada.
+              {unauthorized
+                ? 'Debes iniciar sesión para acceder a esta ficha.'
+                : 'No se pudo cargar la ficha solicitada. Es posible que haya sido eliminada.'}
             </p>
-            <Link href="/">
-              <Button>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Volver al Inicio
-              </Button>
-            </Link>
+            {unauthorized ? (
+              <Link href="/login">
+                <Button>Iniciar sesión</Button>
+              </Link>
+            ) : (
+              <Link href="/">
+                <Button>
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Volver al Inicio
+                </Button>
+              </Link>
+            )}
           </motion.div>
         </main>
       </div>

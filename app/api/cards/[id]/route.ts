@@ -10,12 +10,12 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  try {
-    const userId = getUserIdFromRequest(request)
-    if (!userId) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-    }
+  const userId = getUserIdFromRequest(request)
+  if (!userId) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  }
 
+  try {
     const card = await prisma.card.findFirst({
       where: { id: params.id, userId },
       include: {
@@ -55,12 +55,12 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  try {
-    const userId = getUserIdFromRequest(request)
-    if (!userId) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-    }
+  const userId = getUserIdFromRequest(request)
+  if (!userId) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  }
 
+  try {
     const data = await request.json()
     const { title, source, level1, level2, level3, level4, questions, tags } = data
 
@@ -125,12 +125,12 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  try {
-    const userId = getUserIdFromRequest(request)
-    if (!userId) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-    }
+  const userId = getUserIdFromRequest(request)
+  if (!userId) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  }
 
+  try {
     const card = await prisma.card.findFirst({ where: { id: params.id, userId } })
     if (!card) {
       return NextResponse.json({ error: 'Ficha no encontrada' }, { status: 404 })

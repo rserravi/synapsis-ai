@@ -23,15 +23,27 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
-    const token = getToken()
-    if (!token) return
     const stored = localStorage.getItem('user')
     if (stored) {
       try {
         setUser(JSON.parse(stored) as User)
+        return
       } catch {
         // ignore parse errors
       }
+    }
+
+    const token = getToken()
+    if (token) {
+      fetch('/api/auth/me', { credentials: 'include' })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data) {
+            setUser(data as User)
+            localStorage.setItem('user', JSON.stringify(data))
+          }
+        })
+        .catch(() => {})
     }
   }, [])
 

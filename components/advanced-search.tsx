@@ -71,6 +71,7 @@ export function AdvancedSearch({ onFiltersChange, totalResults, isLoading = fals
 
   useEffect(() => {
     debouncedFilterChange(filters)
+    return () => debouncedFilterChange.cancel()
   }, [filters, debouncedFilterChange])
 
   const fetchTags = async () => {

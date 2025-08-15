@@ -1,0 +1,74 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url    = env("DATABASE_URL")
+}
+
+model Card {
+  id    String   @id @default(cuid())
+  title    String
+  source    String?  // Texto original o fuente
+  
+  // Los 4 niveles de detalle
+  level1    String   // Concepto Clave (anverso de la ficha)
+  level2    String   // Resumen Esencial (3-5 puntos clave)
+  level3    String   // Resumen Detallado (explicación profunda)
+  level4    String   // Análisis Extenso (análisis exhaustivo con ejemplos)
+  
+  // Preguntas de autoevaluación
+  questions   String[] // Array de preguntas generadas
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relación con etiquetas (muchos a muchos)
+  tags    CardTag[]
+  
+  @@map("cards")
+}
+
+model Tag {
+  id    String    @id @default(cuid())
+  name    String    @unique
+  color    String    @default("#3B82F6") // Color para la etiqueta
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  // Relación con fichas (muchos a muchos)
+  cards    CardTag[]
+  
+  @@map("tags")
+}
+
+// Tabla de unión para la relación muchos a muchos entre Card y Tag
+model CardTag {
+  id    String @id @default(cuid())
+  cardId String
+  tagId  String
+  
+  card   Card   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  
+  @@unique([cardId, tagId])
+  @@map("card_tags")
+}
+
+model StudySession {
+  id    String   @id @default(cuid())
+  cardId    String
+  
+  // Métricas de estudio
+  level    Int    // Último nivel estudiado (1-4)
+  difficulty  Int    @default(3) // Dificultad percibida (1-5)
+  lastReview  DateTime @default(now())
+  nextReview  DateTime // Próxima revisión programada
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@map("study_sessions")
+}

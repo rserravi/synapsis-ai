@@ -46,14 +46,26 @@ export function StudyPage() {
       
       if (cardIdParam) {
         // Estudiar una ficha específica
-        const response = await fetch(`/api/cards/${cardIdParam}`)
+        const response = await fetch(`/api/cards/${cardIdParam}`, {
+          credentials: 'include',
+        })
+        if (response.status === 401) {
+          window.location.href = '/login'
+          return
+        }
         if (response.ok) {
           const card = await response.json()
           setCards([card])
         }
       } else {
         // Estudiar todas las fichas
-        const response = await fetch('/api/cards?limit=50')
+        const response = await fetch('/api/cards?limit=50', {
+          credentials: 'include',
+        })
+        if (response.status === 401) {
+          window.location.href = '/login'
+          return
+        }
         if (response.ok) {
           const data = await response.json()
           setCards(data.cards)

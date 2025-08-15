@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Brain, Plus, BookOpen, Target, Zap, Users, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { authFetch } from '@/lib/authFetch'
 
 interface CardData {
   id: string
@@ -83,9 +84,7 @@ export function EnhancedHomePage() {
       }
       if (filters.dateRange !== 'all') params.set('dateRange', filters.dateRange)
 
-      const response = await fetch(`/api/cards/search?${params}`, {
-        credentials: 'include'
-      })
+      const response = await authFetch(`/api/cards/search?${params}`)
       if (response.status === 401) {
         setError('Debes iniciar sesión para ver tus fichas')
         setCards([])

@@ -76,7 +76,11 @@ export function AdvancedSearch({ onFiltersChange, totalResults, isLoading = fals
 
   const fetchTags = async () => {
     try {
-      const response = await fetch('/api/tags')
+      const response = await fetch('/api/tags', { credentials: 'include' })
+      if (response.status === 401) {
+        window.location.href = '/login'
+        return
+      }
       if (response.ok) {
         const tagsData = await response.json()
         setTags(tagsData)

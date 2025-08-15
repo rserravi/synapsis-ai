@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -44,6 +44,7 @@ interface NavigationProps {
 
 export function Navigation({ onSearch, onTagFilter, searchQuery = '', selectedTag = null }: NavigationProps) {
   const pathname = usePathname()
+  const router = useRouter()
   const [tags, setTags] = useState<Tag[]>([])
   const [localSearch, setLocalSearch] = useState(searchQuery)
   const { user, logout } = useAuth()
@@ -58,7 +59,12 @@ export function Navigation({ onSearch, onTagFilter, searchQuery = '', selectedTa
 
   const fetchTags = async () => {
     try {
-      const response = await fetch('/api/tags')
+      const response = await fetch('/api/tags', { credentials: 'include' })
+      if (response.status === 401) {
+        logout()
+        router.push('/login')
+        return
+      }
       if (response.ok) {
         const tagsData = await response.json()
         setTags(tagsData)

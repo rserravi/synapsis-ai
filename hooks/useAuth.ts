@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { AUTH_COOKIE } from '@/lib/auth'
 
 interface User {
   id: string
@@ -60,9 +59,11 @@ export function useAuth() {
     return userData
   }, [])
 
-  const logout = useCallback(() => {
-    if (typeof document !== 'undefined') {
-      document.cookie = `${AUTH_COOKIE}=; Max-Age=0; path=/`
+  const logout = useCallback(async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
+    } catch {
+      // ignore errors
     }
     localStorage.removeItem('user')
     localStorage.removeItem('Authorization')

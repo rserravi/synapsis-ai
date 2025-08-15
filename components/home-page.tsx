@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Brain, Plus, BookOpen, Target, Zap, Users } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 
 interface CardData {
@@ -46,6 +47,8 @@ export function HomePage() {
     totalPages: 0
   })
 
+  const router = useRouter()
+
   useEffect(() => {
     fetchCards()
   }, [searchQuery, selectedTag])
@@ -61,7 +64,13 @@ export function HomePage() {
       if (searchQuery) params.set('search', searchQuery)
       if (selectedTag) params.set('tag', selectedTag)
 
-      const response = await fetch(`/api/cards?${params}`)
+      const response = await fetch(`/api/cards?${params}`, {
+        credentials: 'include'
+      })
+      if (response.status === 401) {
+        router.push('/login')
+        return
+      }
       if (response.ok) {
         const data: PaginatedResponse = await response.json()
         setCards(data.cards)

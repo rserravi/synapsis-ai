@@ -7,6 +7,15 @@ import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { useAuth } from '@/hooks/useAuth'
 import { 
   Brain, 
   Search, 
@@ -37,6 +46,7 @@ export function Navigation({ onSearch, onTagFilter, searchQuery = '', selectedTa
   const pathname = usePathname()
   const [tags, setTags] = useState<Tag[]>([])
   const [localSearch, setLocalSearch] = useState(searchQuery)
+  const { user, logout } = useAuth()
 
   useEffect(() => {
     fetchTags()
@@ -118,26 +128,28 @@ export function Navigation({ onSearch, onTagFilter, searchQuery = '', selectedTa
           </nav>
 
           {/* Search */}
-          {(pathname === '/' || pathname?.startsWith('/cards')) && (
-            <div className="flex-1 max-w-md mx-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
-                <Input
-                  type="search"
-                  placeholder="Buscar fichas..."
-                  value={localSearch}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  className="pl-10 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
-                />
-              </div>
+        {(pathname === '/' || pathname?.startsWith('/cards')) && (
+          <div className="flex-1 max-w-md mx-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
+              <Input
+                type="search"
+                placeholder="Buscar fichas..."
+                value={localSearch}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="pl-10 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+              />
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Mobile menu button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="md:hidden"
+        {user && <UserMenu user={user} onLogout={logout} />}
+
+        {/* Mobile menu button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="md:hidden"
           >
             <Settings className="h-5 w-5" />
           </Button>
@@ -179,5 +191,34 @@ export function Navigation({ onSearch, onTagFilter, searchQuery = '', selectedTa
         )}
       </div>
     </header>
+  )
+}
+
+interface UserMenuProps {
+  user: { name?: string; email?: string }
+  onLogout: () => void
+}
+
+function UserMenu({ user, onLogout }: UserMenuProps) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback>
+              {user.name?.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <div className="flex flex-col gap-1 p-2">
+          <p className="text-sm font-medium leading-none">{user.name}</p>
+          <p className="text-xs text-muted-foreground">{user.email}</p>
+        </div>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={onLogout}>Cerrar sesión</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

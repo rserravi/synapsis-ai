@@ -127,8 +127,8 @@ public
 dev.db
 
 # Prisma
-prisma/migrations/
-!prisma/migrations/.gitkeep
+#prisma/migrations/
+#!prisma/migrations/.gitkeep
 
 # Logs
 logs
